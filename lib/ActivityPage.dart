@@ -1,11 +1,18 @@
+import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:metah/activityController.dart';
 import 'package:metah/activityModel.dart';
+import 'package:metah/activityService.dart';
 import 'package:metah/activityWidget.dart';
+import 'package:metah/constants/LoadingDialog.dart';
 import 'package:metah/constants/color.dart';
 import 'package:metah/constants/icon.dart';
+import 'package:metah/models/user.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
+import 'package:provider/provider.dart';
+import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 class ActivityPage extends StatefulWidget {
@@ -18,6 +25,11 @@ class ActivityPage extends StatefulWidget {
 class _ActivityPageState extends State<ActivityPage> {
   final Duration animDuration = const Duration(milliseconds: 250);
   final _controller = ScrollController();
+  final GlobalKey _gLobalkey = GlobalKey(debugLabel: 'QR');
+  Barcode? result;
+  QRViewController? controller;
+  String barcode = "";
+  String showText = '';
 
   int touchedIndex = -1;
 
@@ -29,6 +41,7 @@ class _ActivityPageState extends State<ActivityPage> {
   double mass = 77;
   final double _weigth = 0;
   final double _high = 0;
+  User? user;
 
   @override
   void initState() {
@@ -48,9 +61,77 @@ class _ActivityPageState extends State<ActivityPage> {
     super.dispose();
   }
 
+  scan() async {
+    ScanResult _barcode = await BarcodeScanner.scan();
+    setState(() {
+      barcode = _barcode.rawContent;
+    });
+    if (barcode != '') {
+      final _user = await ActivityService.getUserByCode(barcode);
+      if (mounted) {
+        setState(() {
+          user = _user;
+        });
+      }
+    }
+
+    // try {
+    //   ScanResult _barcode = await BarcodeScanner.scan();
+    //   setState(() {
+    //     barcode = _barcode.rawContent;
+    //   });
+
+    //   if (barcode != '') {
+    //     //LoadingDialog.open(context);
+    //     //await context.read<ActivityController>().getUser('0000001');
+    //     final user = await ActivityService.getUserByCode('0000001');
+    //     if (mounted) {
+    //       setState(() {});
+    //     }
+    //     //LoadingDialog.close(context);
+    //     //LoadingDialog.open(context);
+    //     // final scan = await ScanApi.getScanTicket(barcode);
+    //     // if (scan != null) {
+    //     //   if (scan['statusCode'] == 200) {
+    //     //     setState(() {
+    //     //       data = scan;
+    //     //       showText = '';
+    //     //     });
+    //     //     //LoadingDialog.close(context);
+    //     //     print('200');
+    //     //   } else if (scan['statusCode'] == 400) {
+    //     //     setState(() {
+    //     //       data.clear();
+    //     //       showText = scan['message'];
+    //     //     });
+    //     //     //LoadingDialog.close(context);
+    //     //   } else {
+    //     //     print('format barcode not true');
+    //     //     setState(() {
+    //     //       //data.clear();
+    //     //       showText = 'ไม่พบตั๋วคอนเสิร์ต';
+    //     //     });
+    //     //     //LoadingDialog.close(context);
+    //     //   }
+    //     //} else {}
+    //   } else {}
+    // } on PlatformException catch (e) {
+    //   if (e.code == BarcodeScanner.cameraAccessDenied) {
+    //     // The user did not grant the camera permission.
+    //   } else {
+    //     // Unknown error.
+    //   }
+    // } on FormatException {
+    //   // User returned using the "back"-button before scanning anything.
+    // } catch (e) {
+    //   // Unknown error.
+    // }
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final isPhone = MediaQuery.of(context).size.shortestSide < 550;
     return Stack(
       children: [
         SingleChildScrollView(
@@ -61,14 +142,17 @@ class _ActivityPageState extends State<ActivityPage> {
               appBar: AppBar(
                 leading: IconButton(
                   onPressed: () {},
-                  icon: Icon(Icons.arrow_back_ios),
+                  icon: Icon(
+                    Icons.arrow_back_ios,
+                    size: isPhone ? 20 : 35,
+                  ),
                 ),
                 automaticallyImplyLeading: false,
-                toolbarHeight: 75,
+                toolbarHeight: isPhone ?size.height * 0.165 :size.height * 0.145,
                 backgroundColor: Colors.transparent,
                 elevation: 0,
                 flexibleSpace: Container(
-                  height: size.height * 0.30,
+                  height: isPhone ? size.height * 0.30 : size.height * 0.50,
                   decoration: BoxDecoration(
                     image: DecorationImage(
                       fit: BoxFit.cover,
@@ -98,115 +182,120 @@ class _ActivityPageState extends State<ActivityPage> {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
+                                          crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
                                             Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.start,
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
+                                              mainAxisAlignment: MainAxisAlignment.start,
+                                              crossAxisAlignment: CrossAxisAlignment.start,
                                               children: [
                                                 Column(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.start,
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
+                                                  mainAxisAlignment: MainAxisAlignment.start,
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
                                                   children: [
                                                     Row(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .start,
+                                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                                      mainAxisAlignment: MainAxisAlignment.start,
                                                       children: [
                                                         SizedBox(
-                                                          width:
-                                                              size.width * 0.30,
-                                                          child: Text(
-                                                            "Jeon Jungkook",
-                                                            style: TextStyle(
-                                                              fontSize: 16,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
-                                                              color:
-                                                                  kDefaultTextColor,
-                                                            ),
-                                                            overflow:
-                                                                TextOverflow
-                                                                    .ellipsis,
-                                                            maxLines: 1,
-                                                          ),
+                                                          width: isPhone ?size.width * 0.30 : size.width * 0.50,
+                                                          child: user != null
+                                                              ? Text("${user!.name}",
+                                                                  style: TextStyle(
+                                                                    fontSize: isPhone ?16 :25,
+                                                                    fontWeight: FontWeight.bold,
+                                                                    color: kDefaultTextColor,
+                                                                  ),
+                                                                  overflow: TextOverflow.ellipsis,
+                                                                  maxLines: 1,
+                                                                )
+                                                              : Text('null',
+                                                                  style: TextStyle(
+                                                                    fontSize: isPhone ?16 :25,
+                                                                    fontWeight: FontWeight.bold,
+                                                                    color: kDefaultTextColor,
+                                                                  )),
                                                         ),
                                                       ],
                                                     ),
                                                     Row(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .start,
+                                                      mainAxisAlignment: MainAxisAlignment.start,
                                                       children: [
                                                         Row(
-                                                          children: const [
+                                                          children: [
                                                             Image(
-                                                                image:
-                                                                    kLevelIcon),
-                                                            SizedBox(
-                                                              width: 5,
+                                                              image: kLevelIcon,
+                                                              width: isPhone ?16 :26,
+                                                              height: isPhone ?16 :26,
+                                                              fit: BoxFit.fill,
                                                             ),
-                                                            Text(
-                                                              "9",
-                                                              style: TextStyle(
-                                                                  fontSize: 14,
-                                                                  color:
-                                                                      kDefaultTextColor),
-                                                            )
+                                                            SizedBox(width: isPhone ?5 : 10,),
+                                                            user != null
+                                                                ? Text(
+                                                                    "${user!.level}",
+                                                                    style: TextStyle(
+                                                                        fontSize: isPhone ?14 :20,
+                                                                        color: kDefaultTextColor),
+                                                                  )
+                                                                : Text(
+                                                                    "null",
+                                                                    style: TextStyle(
+                                                                        fontSize:isPhone ?14 :20,
+                                                                        color: kDefaultTextColor),
+                                                                  )
                                                           ],
                                                         ),
                                                         SizedBox(),
                                                         Row(
-                                                          children: const [
+                                                          children: [
                                                             Image(
-                                                                image:
-                                                                    kAtkIcon),
-                                                            SizedBox(
-                                                              width: 5,
+                                                              image: kAtkIcon,
+                                                              width: isPhone ?16 :26,
+                                                              height: isPhone ?16 :26,
+                                                              fit: BoxFit.fill,
                                                             ),
-                                                            Text(
-                                                              "200K",
-                                                              style: TextStyle(
-                                                                  fontSize: 14,
-                                                                  color:
-                                                                      kDefaultTextColor),
-                                                            )
+                                                            SizedBox(width: isPhone ?5 :10,),
+                                                            user != null
+                                                                ? Text(
+                                                                    "${user!.str}K",
+                                                                    style: TextStyle(
+                                                                        fontSize: isPhone ?14 :20,
+                                                                        color: kDefaultTextColor),
+                                                                  )
+                                                                : Text(
+                                                                    "null",
+                                                                    style: TextStyle(
+                                                                        fontSize: isPhone ?14 :20,
+                                                                        color: kDefaultTextColor),
+                                                                  )
                                                           ],
                                                         ),
                                                         SizedBox(
                                                           width: 10,
                                                         ),
-                                                        Text(
-                                                          "ID: 1234",
-                                                          style: TextStyle(
-                                                              fontSize: 14,
-                                                              color:
-                                                                  kDefaultTextColor),
-                                                        ),
+                                                        user != null
+                                                            ? Text(
+                                                                "ID: ${user!.code}",
+                                                                style: TextStyle(
+                                                                    fontSize: isPhone ?14 :20,
+                                                                    color: kDefaultTextColor),
+                                                              )
+                                                            : Text(
+                                                                "null",
+                                                                style: TextStyle(
+                                                                    fontSize: isPhone ?14 :20,
+                                                                    color: kDefaultTextColor),
+                                                              ),
                                                       ],
                                                     ),
                                                   ],
                                                 ),
                                                 Column(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.center,
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.center,
+                                                  mainAxisAlignment: MainAxisAlignment.center,
+                                                  crossAxisAlignment: CrossAxisAlignment.center,
                                                   children: [
                                                     Row(
                                                       children: [
@@ -214,8 +303,11 @@ class _ActivityPageState extends State<ActivityPage> {
                                                           onTap: () {},
                                                           child: SizedBox(
                                                             child: Image(
-                                                                image:
-                                                                    kWalletIcon),
+                                                              image: kWalletIcon,
+                                                              width: isPhone ?36 :46,
+                                                              height: isPhone ?36 :46,
+                                                              fit: BoxFit.fill,
+                                                            ),
                                                           ),
                                                         ),
                                                         SizedBox(
@@ -224,10 +316,10 @@ class _ActivityPageState extends State<ActivityPage> {
                                                         GestureDetector(
                                                           onTap: () {},
                                                           child: Image(
-                                                            image:
-                                                                kNotificationIcon,
-                                                            width: 36,
-                                                            height: 36,
+                                                            image: kNotificationIcon,
+                                                            width: isPhone ?36 :46,
+                                                            height: isPhone ?36 :46,
+                                                            fit: BoxFit.fill,
                                                           ),
                                                         )
                                                       ],
@@ -241,34 +333,32 @@ class _ActivityPageState extends State<ActivityPage> {
                                       ],
                                     ),
                                     Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         LinearPercentIndicator(
-                                          width: size.width * 0.40,
+                                          width: isPhone ?size.width * 0.42 :size.width * 0.585,
                                           animation: true,
                                           animationDuration: 1000,
-                                          lineHeight: 10.0,
+                                          lineHeight: isPhone ?10.0 :20.0,
                                           percent: 1.0,
                                           center: Text(
                                             "100/100%",
                                             style: TextStyle(
-                                                fontSize: 9,
+                                                fontSize: isPhone ?9 :14,
                                                 color: Colors.white,
                                                 fontWeight: FontWeight.bold),
                                           ),
                                           //progressColor: Colors.red,
-                                          linearGradient: LinearGradient(
-                                              colors: [
-                                                Color.fromARGB(255, 253, 190, 1),
-                                                Color.fromARGB(255, 255, 153, 19),
-                                                Color.fromARGB(255, 255, 60, 0),
-                                                Color.fromARGB(255, 219, 14, 255),
-                                                Color.fromARGB(255, 148, 6, 6),
-                                                Color.fromARGB(255, 119, 31, 23)
-                                              ]),
+                                          linearGradient:
+                                              LinearGradient(colors: [
+                                            Color.fromARGB(255, 253, 190, 1),
+                                            Color.fromARGB(255, 255, 153, 19),
+                                            Color.fromARGB(255, 255, 60, 0),
+                                            Color.fromARGB(255, 219, 14, 255),
+                                            Color.fromARGB(255, 148, 6, 6),
+                                            Color.fromARGB(255, 119, 31, 23)
+                                          ]),
                                         ),
                                       ],
                                     ),
@@ -280,8 +370,8 @@ class _ActivityPageState extends State<ActivityPage> {
                         ),
                         Container(
                           alignment: Alignment.center,
-                          height: 50,
-                          width: 240,
+                          height: isPhone ?50 :60,
+                          width: isPhone ?240 :260,
                           decoration: BoxDecoration(
                               //color: Colors.amber,
                               borderRadius: BorderRadius.circular(20),
@@ -296,6 +386,7 @@ class _ActivityPageState extends State<ActivityPage> {
                           child: Text(
                             'SHOOT WHIT AVATAR',
                             style: TextStyle(
+                              fontSize: isPhone ?14 :20,
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold),
                           ),
@@ -306,841 +397,771 @@ class _ActivityPageState extends State<ActivityPage> {
                 ),
               ),
               body: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    //Image.asset('assets/Setting_bg1.png'),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Column(
-                          children: [
-                            SizedBox(
-                              height: 115,
-                              width: 260,
-                              child: AspectRatio(
-                                aspectRatio: 1,
-                                child: Card(
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(18)),
-                                  color: Color.fromARGB(255, 120, 1, 1),
-                                  child: Stack(
-                                    children: [
-                                      ClipRRect(
-                                        borderRadius: BorderRadius.circular(20),
-                                        child: Image(
-                                          image: AssetImage(
-                                              'assets/BGactivity2.png'),
-                                          height: 115,
-                                          width: 260,
-                                          fit: BoxFit.fill,
-                                        ),
-                                      ),
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.stretch,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        mainAxisSize: MainAxisSize.max,
-                                        children: [
-                                          Padding(
-                                            padding: EdgeInsets.all(3.0),
-                                            child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
+                child: user != null
+                    ? Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          //Image.asset('assets/Setting_bg1.png'),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Column(
+                                children: [
+                                  SizedBox(
+                                    height: isPhone ?115 :190,
+                                    width: isPhone ?260 :390,
+                                    child: AspectRatio(
+                                      aspectRatio: 1,
+                                      child: Card(
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                                        color: Color.fromARGB(255, 120, 1, 1),
+                                        child: Stack(
+                                          children: [
+                                            ClipRRect(
+                                              borderRadius: BorderRadius.circular(20),
+                                              child: Image(
+                                                image: AssetImage('assets/BGactivity2.png'),
+                                                height: isPhone ?115 :190,
+                                                width: isPhone ?260 :390,
+                                                fit: BoxFit.fill,
+                                              ),
+                                            ),
+                                            Column(
+                                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                                              mainAxisAlignment: MainAxisAlignment.start,
+                                              mainAxisSize: MainAxisSize.max,
                                               children: [
                                                 Padding(
-                                                  padding: EdgeInsets.fromLTRB(
-                                                      3, 3, 0, 0),
+                                                  padding: EdgeInsets.all(3.0),
                                                   child: Row(
+                                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                     children: [
-                                                      Image.asset(
-                                                          'assets/Icon/AcFrie.png'),
-                                                      Text(
-                                                        'Calories',
-                                                        style: TextStyle(
-                                                            color:
-                                                                kDefaultTextColor,
-                                                            fontSize: 16,
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .bold),
+                                                      Padding(
+                                                        padding: EdgeInsets.fromLTRB(3, 3, 0, 0),
+                                                        child: Row(
+                                                          children: [
+                                                            Image.asset('assets/Icon/AcFrie.png'),
+                                                            Text(
+                                                              'Calories',
+                                                              style: TextStyle(
+                                                                  color: kDefaultTextColor,
+                                                                  fontSize: isPhone ?16 :25,
+                                                                  fontWeight: FontWeight.bold),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                      Column(
+                                                        mainAxisAlignment: MainAxisAlignment.end,
+                                                        children: [
+                                                          Row(
+                                                            children: [
+                                                              Text(
+                                                                '300',
+                                                                style: TextStyle(
+                                                                    color: kDefaultTextColor,
+                                                                    fontSize: isPhone ?14 :20,
+                                                                    fontWeight: FontWeight.bold),
+                                                              ),
+                                                              Text(
+                                                                'Min',
+                                                                style: TextStyle(
+                                                                    color: kFieldBorderColor,
+                                                                    fontSize: isPhone ?10 :14,
+                                                                    fontWeight: FontWeight.bold),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                          Row(
+                                                            children: [
+                                                              Text(
+                                                                'Daily Avg.',
+                                                                style: TextStyle(
+                                                                    color: kFieldBorderColor,
+                                                                    fontSize: isPhone ?10 :14,
+                                                                    fontWeight: FontWeight.bold),
+                                                              ),
+                                                              Text(
+                                                                '30',
+                                                                style: TextStyle(
+                                                                    color: kDefaultTextColor,
+                                                                    fontSize: isPhone ?14 :20,
+                                                                    fontWeight: FontWeight.bold),
+                                                              ),
+                                                              Text(
+                                                                'Min',
+                                                                style: TextStyle(
+                                                                    color: kFieldBorderColor,
+                                                                    fontSize: isPhone ?10 :14,
+                                                                    fontWeight: FontWeight.bold),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ],
                                                       ),
                                                     ],
                                                   ),
                                                 ),
-                                                Column(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.end,
-                                                  children: [
-                                                    Row(
-                                                      children: [
-                                                        Text(
-                                                          '300',
-                                                          style: TextStyle(
-                                                              color:
-                                                                  kDefaultTextColor,
-                                                              fontSize: 14,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        ),
-                                                        Text(
-                                                          'Min',
-                                                          style: TextStyle(
-                                                              color:
-                                                                  kFieldBorderColor,
-                                                              fontSize: 10,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        ),
-                                                      ],
+                                                Expanded(
+                                                  child: Padding(
+                                                    padding: EdgeInsets.symmetric(horizontal: 1.0),
+                                                    child: BarChart(
+                                                      isPlaying
+                                                          ? randomData()
+                                                          : mainBarData(),
+                                                      swapAnimationDuration:
+                                                          animDuration,
                                                     ),
-                                                    Row(
-                                                      children: [
-                                                        Text(
-                                                          'Daily Avg.',
-                                                          style: TextStyle(
-                                                              color:
-                                                                  kFieldBorderColor,
-                                                              fontSize: 10,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        ),
-                                                        Text(
-                                                          '30',
-                                                          style: TextStyle(
-                                                              color:
-                                                                  kDefaultTextColor,
-                                                              fontSize: 14,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        ),
-                                                        Text(
-                                                          'Min',
-                                                          style: TextStyle(
-                                                              color:
-                                                                  kFieldBorderColor,
-                                                              fontSize: 10,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ],
+                                                  ),
+                                                ),
+                                                SizedBox(
+                                                  height: 5,
                                                 ),
                                               ],
                                             ),
-                                          ),
-                                          Expanded(
-                                            child: Padding(
-                                              padding: EdgeInsets.symmetric(
-                                                  horizontal: 1.0),
-                                              child: BarChart(
-                                                isPlaying
-                                                    ? randomData()
-                                                    : mainBarData(),
-                                                swapAnimationDuration:
-                                                    animDuration,
-                                              ),
-                                            ),
-                                          ),
-                                          SizedBox(
-                                            height: 5,
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-
-                            //card two
-                            SizedBox(
-                              height: 110,
-                              width: 255,
-                              child: AspectRatio(
-                                aspectRatio: 1,
-                                child: Card(
-                                  margin: EdgeInsets.zero,
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(18)),
-                                  color: Color.fromARGB(255, 120, 1, 1),
-                                  child: Stack(
-                                    children: <Widget>[
-                                      ClipRRect(
-                                        borderRadius: BorderRadius.circular(20),
-                                        child: Image(
-                                          image: AssetImage(
-                                              'assets/BGactivity2.png'),
-                                          height: 115,
-                                          width: 258,
-                                          fit: BoxFit.fill,
+                                          ],
                                         ),
                                       ),
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.stretch,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        mainAxisSize: MainAxisSize.max,
-                                        children: <Widget>[
-                                          Padding(
-                                            padding: EdgeInsets.all(5.0),
-                                            child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                              children: [
+                                    ),
+                                  ),
+
+                                  //card two
+                                  SizedBox(
+                                    height: isPhone ?115 :190,
+                                    width: isPhone ?260 :390,
+                                    child: AspectRatio(
+                                      aspectRatio: 1,
+                                      child: Card(
+                                        margin: EdgeInsets.zero,
+                                        shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(18)),
+                                        color: Color.fromARGB(255, 120, 1, 1),
+                                        child: Stack(
+                                          children: <Widget>[
+                                            ClipRRect(
+                                              borderRadius: BorderRadius.circular(20),
+                                              child: Image(
+                                                image: AssetImage('assets/BGactivity2.png'),
+                                                height: isPhone ?115 :190,
+                                                width: isPhone ?260 :390,
+                                                fit: BoxFit.fill,
+                                              ),
+                                            ),
+                                            Column(
+                                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                                              mainAxisAlignment: MainAxisAlignment.start,
+                                              mainAxisSize: MainAxisSize.max,
+                                              children: <Widget>[
                                                 Padding(
-                                                  padding: EdgeInsets.fromLTRB(
-                                                      3, 5, 0, 0),
+                                                  padding: EdgeInsets.all(5.0),
                                                   child: Row(
+                                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                     children: [
-                                                      Image.asset(
-                                                          'assets/Icon/AcWorkout.png'),
-                                                      Text(
-                                                        'Workout',
-                                                        style: TextStyle(
-                                                            color:
-                                                                kDefaultTextColor,
-                                                            fontSize: 16,
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .bold),
+                                                      Padding(
+                                                        padding: EdgeInsets.fromLTRB(3, 5, 0, 0),
+                                                        child: Row(
+                                                          children: [
+                                                            Image.asset('assets/Icon/AcWorkout.png'),
+                                                            Text(
+                                                              'Workout',
+                                                              style: TextStyle(
+                                                                  color: kDefaultTextColor,
+                                                                  fontSize: isPhone ?16 :25,
+                                                                  fontWeight: FontWeight.bold),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                      Column(
+                                                        mainAxisAlignment: MainAxisAlignment.end,
+                                                        children: [
+                                                          Row(
+                                                            children: [
+                                                              Text(
+                                                                '300',
+                                                                style: TextStyle(
+                                                                    color: kDefaultTextColor,
+                                                                    fontSize: isPhone ?14 :20,
+                                                                    fontWeight: FontWeight.bold),
+                                                              ),
+                                                              Text(
+                                                                'Min',
+                                                                style: TextStyle(
+                                                                    color: kFieldBorderColor,
+                                                                    fontSize: isPhone ?10 :14,
+                                                                    fontWeight: FontWeight.bold),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                          Row(
+                                                            children: [
+                                                              Text(
+                                                                'Daily Avg.',
+                                                                style: TextStyle(
+                                                                    color: kFieldBorderColor,
+                                                                    fontSize: isPhone ?10 :14,
+                                                                    fontWeight: FontWeight.bold),
+                                                              ),
+                                                              Text(
+                                                                '30',
+                                                                style: TextStyle(
+                                                                    color: kDefaultTextColor,
+                                                                    fontSize: isPhone ?14 :20,
+                                                                    fontWeight: FontWeight.bold),
+                                                              ),
+                                                              Text(
+                                                                'Min',
+                                                                style: TextStyle(
+                                                                    color: kFieldBorderColor,
+                                                                    fontSize: isPhone ?10 :14,
+                                                                    fontWeight: FontWeight.bold),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ],
                                                       ),
                                                     ],
                                                   ),
                                                 ),
-                                                Column(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.end,
-                                                  children: [
-                                                    Row(
-                                                      children: [
-                                                        Text(
-                                                          '300',
-                                                          style: TextStyle(
-                                                              color:
-                                                                  kDefaultTextColor,
-                                                              fontSize: 14,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        ),
-                                                        Text(
-                                                          'Min',
-                                                          style: TextStyle(
-                                                              color:
-                                                                  kFieldBorderColor,
-                                                              fontSize: 10,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        ),
-                                                      ],
+                                                Expanded(
+                                                  child: Padding(
+                                                    padding: EdgeInsets.symmetric(horizontal: 1.0),
+                                                    child: BarChart(
+                                                      isPlaying
+                                                          ? randomData()
+                                                          : mainBarData2(),
+                                                      swapAnimationDuration:
+                                                          animDuration,
                                                     ),
-                                                    Row(
-                                                      children: [
-                                                        Text(
-                                                          'Daily Avg.',
-                                                          style: TextStyle(
-                                                              color:
-                                                                  kFieldBorderColor,
-                                                              fontSize: 10,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        ),
-                                                        Text(
-                                                          '30',
-                                                          style: TextStyle(
-                                                              color:
-                                                                  kDefaultTextColor,
-                                                              fontSize: 12,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        ),
-                                                        Text(
-                                                          'Min',
-                                                          style: TextStyle(
-                                                              color:
-                                                                  kFieldBorderColor,
-                                                              fontSize: 10,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ],
+                                                  ),
+                                                ),
+                                                SizedBox(
+                                                  height: 5,
                                                 ),
                                               ],
                                             ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  //
+                                  SizedBox(
+                                    height: 3,
+                                  ),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      WalkChartWidget(chartWalk: chartWalk),
+                                      SizedBox(width: size.width*0.008,),
+                                      BurnChartWidget(chartBurn: chartBurn),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                              Padding(
+                                padding: EdgeInsets.symmetric(horizontal: size.width *0.005),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    Container(
+                                      height: isPhone ?95 :150,
+                                      width: isPhone ?260 :390,
+                                      decoration: BoxDecoration(
+                                        image: DecorationImage(
+                                            image: AssetImage('assets/BGAbout.png'),
+                                            fit: BoxFit.fill),
+                                      ),
+                                      child: AboutyouWidget(
+                                        bmi: user!.bmi.toString(),
+                                        sex: user!.sex,
+                                        higth: user!.higth.toString(),
+                                        weight: user!.weight.toString(),
+                                      ),
+                                    ),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Container(
+                                          height: isPhone ?125 :160,
+                                          width: isPhone ?125 :180,
+                                          decoration: BoxDecoration(
+                                              border: Border.all(
+                                                  color: Color.fromARGB(255, 253, 76, 64)),
+                                              image: DecorationImage(
+                                                  image: AssetImage('assets/BGactivity3.png'),
+                                                  fit: BoxFit.cover),
+                                              borderRadius: BorderRadius.circular(20)),
+                                          child: Column(
+                                            children: [
+                                              Padding(
+                                                padding: EdgeInsets.fromLTRB(10, 10, 0, 0),
+                                                child: Row(
+                                                  children: [
+                                                    Image.asset('assets/Icon/AcWeight.png'),
+                                                    Text(
+                                                      'Weight',
+                                                      style: TextStyle(
+                                                          fontSize: isPhone ?14 :20,
+                                                          fontWeight: FontWeight.bold,
+                                                          color: kDefaultTextColor),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                height: 5,
+                                              ),
+                                              Row(
+                                                crossAxisAlignment: CrossAxisAlignment.end,
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                children: [
+                                                  Text(
+                                                    //mass.toString(),
+                                                    user!.weight.toString(),
+                                                    style: TextStyle(
+                                                        fontSize: isPhone ?20 :30,
+                                                        fontWeight: FontWeight.bold,
+                                                        color: kDefaultTextColor),
+                                                  ),
+                                                  Text(
+                                                    'kg',
+                                                    style: TextStyle(
+                                                        fontSize: isPhone ?10 :16,
+                                                        fontWeight: FontWeight.bold,
+                                                        color: kFieldBorderColor),
+                                                  ),
+                                                ],
+                                              ),
+                                              SizedBox(
+                                                height: 5,
+                                              ),
+                                              GestureDetector(
+                                                onTap: () {},
+                                                child: Text(
+                                                  'Updete',
+                                                  style: TextStyle(fontSize: isPhone ?14 :20,
+                                                      color: Colors.blue),
+                                                ),
+                                              ),
+                                            ],
                                           ),
-                                          Expanded(
-                                            child: Padding(
-                                              padding: EdgeInsets.symmetric(
-                                                  horizontal: 1.0),
-                                              child: BarChart(
-                                                isPlaying
-                                                    ? randomData()
-                                                    : mainBarData2(),
-                                                swapAnimationDuration:
-                                                    animDuration,
+                                        ),
+                                        SizedBox(
+                                          width: size.width*0.003,
+                                        ),
+                                        Container(
+                                          height: isPhone ?125 :160,
+                                          width: isPhone ?125 :180,
+                                          decoration: BoxDecoration(
+                                              border: Border.all(color: Color.fromARGB(255, 253, 76, 64)),
+                                              image: DecorationImage(
+                                                  image: AssetImage('assets/BGactivity3.png'),
+                                                  fit: BoxFit.cover),
+                                              borderRadius: BorderRadius.circular(20)),
+                                          child: Column(
+                                            children: [
+                                              Padding(
+                                                padding: EdgeInsets.fromLTRB(10, 10, 0, 0),
+                                                child: Row(
+                                                  children: [
+                                                    Image.asset('assets/Icon/AcBMI.png'),
+                                                    Text(
+                                                      'BMI',
+                                                      style: TextStyle(
+                                                          fontSize: isPhone ?14 :20,
+                                                          fontWeight: FontWeight.bold,
+                                                          color: kDefaultTextColor),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                height: 5,
+                                              ),
+                                              Text(
+                                                '${user!.bmi}',
+                                                style: TextStyle(
+                                                    fontSize: isPhone ?20 :30,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: kDefaultTextColor),
+                                              )
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(
+                                      height: 5,
+                                    ),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Container(
+                                          height: isPhone ?125 :160,
+                                          width: isPhone ?125 :180,
+                                          decoration: BoxDecoration(
+                                              border: Border.all(
+                                                  color: Color.fromARGB(255, 253, 76, 64)),
+                                              image: DecorationImage(
+                                                  image: AssetImage('assets/BGactivity3.png'),
+                                                  fit: BoxFit.cover),
+                                              borderRadius: BorderRadius.circular(20)),
+                                          child: Column(
+                                            children: [
+                                              Padding(
+                                                padding: EdgeInsets.fromLTRB(20, 10, 0, 0),
+                                                child: Row(
+                                                  children: [
+                                                    Image.asset('assets/Icon/AcFat.png'),
+                                                    Text(
+                                                      'Fat mass',
+                                                      style: TextStyle(
+                                                          fontSize: isPhone ?16 :25,
+                                                          fontWeight: FontWeight.bold,
+                                                          color: kDefaultTextColor),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                height: 10,
+                                              ),
+                                              Row(
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                children: [
+                                                  Text(
+                                                    '${user!.fatMass}',
+                                                    style: TextStyle(
+                                                        fontSize: isPhone ?25 :35,
+                                                        fontWeight: FontWeight.bold,
+                                                        color: kDefaultTextColor),
+                                                  ),
+                                                  Text(
+                                                    '%',
+                                                    style: TextStyle(
+                                                        fontSize: isPhone ?25 :35,
+                                                        fontWeight: FontWeight.bold,
+                                                        color: kFieldBorderColor),
+                                                  ),
+                                                ],
+                                              ),
+                                              SizedBox(
+                                                height: 10,
+                                              ),
+                                              GestureDetector(
+                                                onTap: () {},
+                                                child: Text(
+                                                  'Updete',
+                                                  style: TextStyle(fontSize: isPhone ?14 :20,
+                                                      color: Colors.blue),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          width: size.width*0.003,
+                                        ),
+                                        Container(
+                                          height: isPhone ?125 :160,
+                                          width: isPhone ?125 :180,
+                                          decoration: BoxDecoration(
+                                              border: Border.all(
+                                                  color: Color.fromARGB(255, 253, 76, 64)),
+                                              image: DecorationImage(
+                                                  image: AssetImage('assets/BGactivity3.png'),
+                                                  fit: BoxFit.cover),
+                                              borderRadius: BorderRadius.circular(20)),
+                                          child: Column(
+                                            children: [
+                                              Padding(
+                                                padding: EdgeInsets.fromLTRB(20, 10, 0, 0),
+                                                child: Row(
+                                                  children: [
+                                                    Image.asset('assets/Icon/AcMuscle.png'),
+                                                    Text(
+                                                      'Muscle',
+                                                      style: TextStyle(
+                                                          fontSize: isPhone ?16 :25,
+                                                          fontWeight: FontWeight.bold,
+                                                          color: kDefaultTextColor),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                height: 10,
+                                              ),
+                                              Row(
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                children: [
+                                                  Text(
+                                                    '${user!.muscle}',
+                                                    style: TextStyle(
+                                                        fontSize: isPhone ?20 :30,
+                                                        fontWeight: FontWeight.bold,
+                                                        color: kDefaultTextColor),
+                                                  ),
+                                                  Text(
+                                                    '%',
+                                                    style: TextStyle(
+                                                        fontSize: isPhone ?20 :30,
+                                                        fontWeight: FontWeight.bold,
+                                                        color: kFieldBorderColor),
+                                                  ),
+                                                ],
+                                              ),
+                                              SizedBox(
+                                                height: 10,
+                                              ),
+                                              GestureDetector(
+                                                onTap: () {},
+                                                child: Text(
+                                                  'Updete',
+                                                  style: TextStyle(fontSize: isPhone ?14 :20,
+                                                      color: Colors.blue),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Container(
+                                        height: isPhone ?125 :160,
+                                        width: isPhone ?125 :180,
+                                        decoration: BoxDecoration(
+                                            border: Border.all(
+                                                color: Color.fromARGB(255, 253, 76, 64)),
+                                            image: DecorationImage(
+                                                image: AssetImage('assets/BGactivity3.png'),
+                                                fit: BoxFit.cover),
+                                            borderRadius: BorderRadius.circular(20)),
+                                        child: Column(
+                                          children: [
+                                            Padding(
+                                              padding: EdgeInsets.fromLTRB(10, 10, 0, 0),
+                                              child: Row(
+                                                children: [
+                                                  Image.asset('assets/Icon/AcWeight.png'),
+                                                  Text(
+                                                    'Weight',
+                                                    style: TextStyle(
+                                                        fontSize: isPhone ?16 :25,
+                                                        fontWeight: FontWeight.bold,
+                                                        color: kDefaultTextColor),
+                                                  ),
+                                                ],
                                               ),
                                             ),
-                                          ),
-                                          SizedBox(
-                                            height: 5,
-                                          ),
-                                        ],
+                                            SizedBox(
+                                              height: 10,
+                                            ),
+                                            Row(
+                                              crossAxisAlignment: CrossAxisAlignment.end,
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: [
+                                                Text(
+                                                  '${user!.weight}',
+                                                  style: TextStyle(
+                                                      fontSize: isPhone ?20 :30,
+                                                      fontWeight: FontWeight.bold,
+                                                      color: kDefaultTextColor),
+                                                ),
+                                                Text(
+                                                  'kg',
+                                                  style: TextStyle(
+                                                      fontSize: isPhone ?10 :16,
+                                                      fontWeight: FontWeight.bold,
+                                                      color: kFieldBorderColor),
+                                                ),
+                                              ],
+                                            ),
+                                            SizedBox(
+                                              height: 10,
+                                            ),
+                                            GestureDetector(
+                                              onTap: () {},
+                                              child: Text(
+                                                'Change',
+                                                style: TextStyle(fontSize: isPhone ?14 :20,
+                                                    color: Colors.blue),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 5,
+                                      ),
+                                      Container(
+                                        height: isPhone ?125 :160,
+                                        width: isPhone ?125 :180,
+                                        decoration: BoxDecoration(
+                                            border: Border.all(
+                                                color: Color.fromARGB(255, 253, 76, 64)),
+                                            image: DecorationImage(
+                                                image: AssetImage('assets/BGactivity3.png'),
+                                                fit: BoxFit.cover),
+                                            borderRadius: BorderRadius.circular(20)),
+                                        child: Column(
+                                          children: [
+                                            Padding(
+                                              padding: EdgeInsets.fromLTRB(10, 10, 0, 0),
+                                              child: Row(
+                                                children: [
+                                                  Image.asset('assets/Icon/AcMuscle.png'),
+                                                  Text(
+                                                    'Muscle',
+                                                    style: TextStyle(
+                                                        fontSize: isPhone ?16 :25,
+                                                        fontWeight: FontWeight.bold,
+                                                        color: kDefaultTextColor),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            SizedBox(
+                                              height: 10,
+                                            ),
+                                            Row(
+                                              crossAxisAlignment: CrossAxisAlignment.end,
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: [
+                                                Text(
+                                                  '${user!.muscle}',
+                                                  style: TextStyle(
+                                                      fontSize: isPhone ?20 :30,
+                                                      fontWeight: FontWeight.bold,
+                                                      color: kDefaultTextColor),
+                                                ),
+                                                Text(
+                                                  '%',
+                                                  style: TextStyle(
+                                                      fontSize: isPhone ?20 :30,
+                                                      fontWeight: FontWeight.bold,
+                                                      color: kFieldBorderColor),
+                                                ),
+                                              ],
+                                            ),
+                                            SizedBox(
+                                              height: 10,
+                                            ),
+                                            GestureDetector(
+                                              onTap: () {},
+                                              child: Text(
+                                                'Change',
+                                                style: TextStyle(fontSize: isPhone ?14 :20,
+                                                    color: Colors.blue),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ],
                                   ),
-                                ),
+                                  SizedBox(
+                                    height: 5,
+                                  ),
+                                  Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      Container(
+                                        height: isPhone ?125 :160,
+                                        width: isPhone ?125 :180,
+                                        decoration: BoxDecoration(
+                                            border: Border.all(
+                                                color: Color.fromARGB(255, 253, 76, 64)),
+                                            image: DecorationImage(
+                                                image: AssetImage('assets/BGactivity3.png'),
+                                                fit: BoxFit.cover),
+                                            borderRadius: BorderRadius.circular(20)),
+                                        child: Column(
+                                          children: [
+                                            Padding(
+                                              padding: EdgeInsets.fromLTRB(10, 10, 0, 0),
+                                              child: Row(
+                                                children: [
+                                                  Image.asset('assets/Icon/AcFat.png'),
+                                                  Text(
+                                                    'Fat mass',
+                                                    style: TextStyle(
+                                                        fontSize: isPhone ?16 :25,
+                                                        fontWeight: FontWeight.bold,
+                                                        color: kDefaultTextColor),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            SizedBox(
+                                              height: 10,
+                                            ),
+                                            Row(
+                                              crossAxisAlignment: CrossAxisAlignment.end,
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: [
+                                                Text(
+                                                  '${user!.fatMass}',
+                                                  style: TextStyle(
+                                                      fontSize: isPhone ?20 :30,
+                                                      fontWeight: FontWeight.bold,
+                                                      color: kDefaultTextColor),
+                                                ),
+                                                Text(
+                                                  '%',
+                                                  style: TextStyle(
+                                                      fontSize: isPhone ?16 :25,
+                                                      fontWeight: FontWeight.bold,
+                                                      color: kFieldBorderColor),
+                                                ),
+                                              ],
+                                            ),
+                                            SizedBox(
+                                              height: 10,
+                                            ),
+                                            GestureDetector(
+                                              onTap: () async {},
+                                              child: Text(
+                                                'Change',
+                                                style: TextStyle(fontSize: isPhone ?14 :20,
+                                                    color: Colors.blue),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
                               ),
-                            ),
-                            //
-                            SizedBox(
-                              height: 3,
-                            ),
-                            Row(
-                              children: [
-                                WalkChartWidget(chartWalk: chartWalk),
-                                BurnChartWidget(chartBurn: chartBurn),
-                              ],
-                            ),
-                          ],
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Container(
-                              height: 95,
-                              width: 260,
-                              decoration: BoxDecoration(
-                                image: DecorationImage(
-                                    image: AssetImage('assets/BGAbout.png'),
-                                    fit: BoxFit.fill),
-                              ),
-                              child: AboutyouWidget(),
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Container(
-                                  height: 125,
-                                  width: 125,
-                                  decoration: BoxDecoration(
-                                      border: Border.all(
-                                          color:
-                                              Color.fromARGB(255, 253, 76, 64)),
-                                      image: DecorationImage(
-                                          image: AssetImage(
-                                              'assets/BGactivity3.png'),
-                                          fit: BoxFit.cover),
-                                      borderRadius: BorderRadius.circular(20)),
-                                  child: Column(
-                                    children: [
-                                      Padding(
-                                        padding:
-                                            EdgeInsets.fromLTRB(10, 10, 0, 0),
-                                        child: Row(
-                                          children: [
-                                            Image.asset(
-                                                'assets/Icon/AcWeight.png'),
-                                            Text(
-                                              'Weight',
-                                              style: TextStyle(
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: kDefaultTextColor),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      SizedBox(
-                                        height: 5,
-                                      ),
-                                      Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.end,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            mass.toString(),
-                                            style: TextStyle(
-                                                fontSize: 20,
-                                                fontWeight: FontWeight.bold,
-                                                color: kDefaultTextColor),
-                                          ),
-                                          Text(
-                                            'kg',
-                                            style: TextStyle(
-                                                fontSize: 10,
-                                                fontWeight: FontWeight.bold,
-                                                color: kFieldBorderColor),
-                                          ),
-                                        ],
-                                      ),
-                                      SizedBox(
-                                        height: 5,
-                                      ),
-                                      GestureDetector(
-                                        onTap: () {},
-                                        child: Text(
-                                          'Updete',
-                                          style: TextStyle(color: Colors.blue),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 2,
-                                ),
-                                Container(
-                                  height: 125,
-                                  width: 125,
-                                  decoration: BoxDecoration(
-                                      border: Border.all(
-                                          color:
-                                              Color.fromARGB(255, 253, 76, 64)),
-                                      image: DecorationImage(
-                                          image: AssetImage(
-                                              'assets/BGactivity3.png'),
-                                          fit: BoxFit.cover),
-                                      borderRadius: BorderRadius.circular(20)),
-                                  child: Column(
-                                    children: [
-                                      Padding(
-                                        padding: const EdgeInsets.fromLTRB(
-                                            10, 10, 0, 0),
-                                        child: Row(
-                                          children: [
-                                            Image.asset(
-                                                'assets/Icon/AcBMI.png'),
-                                            Text(
-                                              'BMI',
-                                              style: TextStyle(
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: kDefaultTextColor),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      SizedBox(
-                                        height: 5,
-                                      ),
-                                      Text(
-                                        '25.0',
-                                        style: TextStyle(
-                                            fontSize: 20,
-                                            fontWeight: FontWeight.bold,
-                                            color: kDefaultTextColor),
-                                      )
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                            SizedBox(
-                              height: 5,
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Container(
-                                  height: 125,
-                                  width: 125,
-                                  decoration: BoxDecoration(
-                                      border: Border.all(
-                                          color:
-                                              Color.fromARGB(255, 253, 76, 64)),
-                                      image: DecorationImage(
-                                          image: AssetImage(
-                                              'assets/BGactivity3.png'),
-                                          fit: BoxFit.cover),
-                                      borderRadius: BorderRadius.circular(20)),
-                                  child: Column(
-                                    children: [
-                                      Padding(
-                                        padding:
-                                            EdgeInsets.fromLTRB(20, 10, 0, 0),
-                                        child: Row(
-                                          children: [
-                                            Image.asset(
-                                                'assets/Icon/AcFat.png'),
-                                            Text(
-                                              'Fat mass',
-                                              style: TextStyle(
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: kDefaultTextColor),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      SizedBox(
-                                        height: 10,
-                                      ),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            '15',
-                                            style: TextStyle(
-                                                fontSize: 25,
-                                                fontWeight: FontWeight.bold,
-                                                color: kDefaultTextColor),
-                                          ),
-                                          Text(
-                                            '%',
-                                            style: TextStyle(
-                                                fontSize: 25,
-                                                fontWeight: FontWeight.bold,
-                                                color: kFieldBorderColor),
-                                          ),
-                                        ],
-                                      ),
-                                      SizedBox(
-                                        height: 10,
-                                      ),
-                                      GestureDetector(
-                                        onTap: () {},
-                                        child: Text(
-                                          'Updete',
-                                          style: TextStyle(color: Colors.blue),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 5,
-                                ),
-                                Container(
-                                  height: 125,
-                                  width: 125,
-                                  decoration: BoxDecoration(
-                                      border: Border.all(
-                                          color:
-                                              Color.fromARGB(255, 253, 76, 64)),
-                                      image: DecorationImage(
-                                          image: AssetImage(
-                                              'assets/BGactivity3.png'),
-                                          fit: BoxFit.cover),
-                                      borderRadius: BorderRadius.circular(20)),
-                                  child: Column(
-                                    children: [
-                                      Padding(
-                                        padding:
-                                            EdgeInsets.fromLTRB(20, 10, 0, 0),
-                                        child: Row(
-                                          children: [
-                                            Image.asset(
-                                                'assets/Icon/AcMuscle.png'),
-                                            Text(
-                                              'Muscle',
-                                              style: TextStyle(
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: kDefaultTextColor),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      SizedBox(
-                                        height: 10,
-                                      ),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            '15',
-                                            style: TextStyle(
-                                                fontSize: 20,
-                                                fontWeight: FontWeight.bold,
-                                                color: kDefaultTextColor),
-                                          ),
-                                          Text(
-                                            '%',
-                                            style: TextStyle(
-                                                fontSize: 20,
-                                                fontWeight: FontWeight.bold,
-                                                color: kFieldBorderColor),
-                                          ),
-                                        ],
-                                      ),
-                                      SizedBox(
-                                        height: 10,
-                                      ),
-                                      GestureDetector(
-                                        onTap: () {},
-                                        child: Text(
-                                          'Updete',
-                                          style: TextStyle(color: Colors.blue),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Container(
-                                  height: 125,
-                                  width: 125,
-                                  decoration: BoxDecoration(
-                                      border: Border.all(
-                                          color:
-                                              Color.fromARGB(255, 253, 76, 64)),
-                                      image: DecorationImage(
-                                          image: AssetImage(
-                                              'assets/BGactivity3.png'),
-                                          fit: BoxFit.cover),
-                                      borderRadius: BorderRadius.circular(20)),
-                                  child: Column(
-                                    children: [
-                                      Padding(
-                                        padding:
-                                            EdgeInsets.fromLTRB(10, 10, 0, 0),
-                                        child: Row(
-                                          children: [
-                                            Image.asset(
-                                                'assets/Icon/AcWeight.png'),
-                                            Text(
-                                              'Weight',
-                                              style: TextStyle(
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: kDefaultTextColor),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      SizedBox(
-                                        height: 10,
-                                      ),
-                                      Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.end,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            '55',
-                                            style: TextStyle(
-                                                fontSize: 20,
-                                                fontWeight: FontWeight.bold,
-                                                color: kDefaultTextColor),
-                                          ),
-                                          Text(
-                                            'kg',
-                                            style: TextStyle(
-                                                fontSize: 10,
-                                                fontWeight: FontWeight.bold,
-                                                color: kFieldBorderColor),
-                                          ),
-                                        ],
-                                      ),
-                                      SizedBox(
-                                        height: 10,
-                                      ),
-                                      GestureDetector(
-                                        onTap: () {},
-                                        child: Text(
-                                          'Change',
-                                          style: TextStyle(color: Colors.blue),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 5,
-                                ),
-                                Container(
-                                  height: 125,
-                                  width: 125,
-                                  decoration: BoxDecoration(
-                                      border: Border.all(
-                                          color:
-                                              Color.fromARGB(255, 253, 76, 64)),
-                                      image: DecorationImage(
-                                          image: AssetImage(
-                                              'assets/BGactivity3.png'),
-                                          fit: BoxFit.cover),
-                                      borderRadius: BorderRadius.circular(20)),
-                                  child: Column(
-                                    children: [
-                                      Padding(
-                                        padding:
-                                            EdgeInsets.fromLTRB(10, 10, 0, 0),
-                                        child: Row(
-                                          children: [
-                                            Image.asset(
-                                                'assets/Icon/AcMuscle.png'),
-                                            Text(
-                                              'Muscle',
-                                              style: TextStyle(
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: kDefaultTextColor),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      SizedBox(
-                                        height: 10,
-                                      ),
-                                      Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.end,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            '30',
-                                            style: TextStyle(
-                                                fontSize: 20,
-                                                fontWeight: FontWeight.bold,
-                                                color: kDefaultTextColor),
-                                          ),
-                                          Text(
-                                            '%',
-                                            style: TextStyle(
-                                                fontSize: 20,
-                                                fontWeight: FontWeight.bold,
-                                                color: kFieldBorderColor),
-                                          ),
-                                        ],
-                                      ),
-                                      SizedBox(
-                                        height: 10,
-                                      ),
-                                      GestureDetector(
-                                        onTap: () {},
-                                        child: Text(
-                                          'Change',
-                                          style: TextStyle(color: Colors.blue),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                            SizedBox(
-                              height: 5,
-                            ),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                Container(
-                                  height: 125,
-                                  width: 125,
-                                  decoration: BoxDecoration(
-                                      border: Border.all(
-                                          color:
-                                              Color.fromARGB(255, 253, 76, 64)),
-                                      image: DecorationImage(
-                                          image: AssetImage(
-                                              'assets/BGactivity3.png'),
-                                          fit: BoxFit.cover),
-                                      borderRadius: BorderRadius.circular(20)),
-                                  child: Column(
-                                    children: [
-                                      Padding(
-                                        padding:
-                                            EdgeInsets.fromLTRB(10, 10, 0, 0),
-                                        child: Row(
-                                          children: [
-                                            Image.asset(
-                                                'assets/Icon/AcFat.png'),
-                                            Text(
-                                              'Fat mass',
-                                              style: TextStyle(
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: kDefaultTextColor),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      SizedBox(
-                                        height: 10,
-                                      ),
-                                      Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.end,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            '15',
-                                            style: TextStyle(
-                                                fontSize: 20,
-                                                fontWeight: FontWeight.bold,
-                                                color: kDefaultTextColor),
-                                          ),
-                                          Text(
-                                            '%',
-                                            style: TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.bold,
-                                                color: kFieldBorderColor),
-                                          ),
-                                        ],
-                                      ),
-                                      SizedBox(
-                                        height: 10,
-                                      ),
-                                      GestureDetector(
-                                        onTap: () async {},
-                                        child: Text(
-                                          'Change',
-                                          style: TextStyle(color: Colors.blue),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+                            ],
+                          ),
 
-                    SizedBox(
-                      height: 20,
-                    ),
-                  ],
-                ),
+                          SizedBox(
+                            height: 20,
+                          ),
+                        ],
+                      )
+                    : SizedBox.shrink(),
+              ),
+              floatingActionButton: FloatingActionButton(
+                onPressed: scan,
+                backgroundColor: Color.fromARGB(255, 253, 76, 64),
+                child: const Icon(Icons.qr_code_2),
               ),
             ),
           ),
@@ -1408,36 +1429,37 @@ class _ActivityPageState extends State<ActivityPage> {
   // Group2
 
   Widget getTitles(double value, TitleMeta meta) {
-    const style = TextStyle(
+    final isPhone = MediaQuery.of(context).size.shortestSide < 550;
+    final style = TextStyle(
       color: Colors.white,
       fontWeight: FontWeight.bold,
-      fontSize: 12,
+      fontSize: isPhone ?12 :16,
     );
     Widget text;
     switch (value.toInt()) {
       case 0:
-        text = const Text('Sun', style: style);
+        text = Text('Sun', style: style);
         break;
       case 1:
-        text = const Text('Mon', style: style);
+        text = Text('Mon', style: style);
         break;
       case 2:
-        text = const Text('Tue', style: style);
+        text = Text('Tue', style: style);
         break;
       case 3:
-        text = const Text('Wed', style: style);
+        text = Text('Wed', style: style);
         break;
       case 4:
-        text = const Text('Thu', style: style);
+        text = Text('Thu', style: style);
         break;
       case 5:
-        text = const Text('Fri', style: style);
+        text = Text('Fri', style: style);
         break;
       case 6:
-        text = const Text('Sat', style: style);
+        text = Text('Sat', style: style);
         break;
       default:
-        text = const Text('', style: style);
+        text = Text('', style: style);
         break;
     }
     return SideTitleWidget(
@@ -1447,7 +1469,7 @@ class _ActivityPageState extends State<ActivityPage> {
     );
   }
 
-  BarChartData randomData() {
+  BarChartData randomData() {    
     return BarChartData(
       barTouchData: BarTouchData(
         enabled: false,

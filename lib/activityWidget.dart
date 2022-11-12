@@ -13,11 +13,12 @@ class WalkChartWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isPhone = MediaQuery.of(context).size.shortestSide < 550;
     return GestureDetector(
       onTap: (){},
       child: Container(
-        height: 125,
-        width: 120,
+        height: isPhone ?125 :180,
+        width: isPhone ?120 :180,
         decoration: BoxDecoration(
             border: Border.all(color: Color.fromARGB(255, 253, 76, 64)),
             image: DecorationImage(
@@ -32,7 +33,7 @@ class WalkChartWidget extends StatelessWidget {
                   Image.asset('assets/Icon/Acwalk.png'),
                   Text(
                     'Walk',
-                    style: TextStyle(fontSize: 15, color: kFieldBorderColor),
+                    style: TextStyle(fontSize: isPhone ?15 :22, color: kFieldBorderColor),
                   )
                 ],
               ),
@@ -40,23 +41,23 @@ class WalkChartWidget extends StatelessWidget {
             CircularStepProgressIndicator(
               totalSteps: 10000,
               currentStep: chartWalk,
-              stepSize: 12,
+              stepSize: isPhone ?12 :16,
               selectedColor: Color(0xFF38E6F0),
               unselectedColor: Colors.black,
-              width: 80,
-              height: 80,
-              selectedStepSize: 12,
+              width: isPhone ?80 :110,
+              height: isPhone ?80 :110,
+              selectedStepSize: isPhone ?12 :16,
               // roundedCap: (_, __) => true,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
                     chartWalk.toString(),
-                    style: TextStyle(fontSize: 12, color: kDefaultTextColor),
+                    style: TextStyle(fontSize: isPhone ?12 :18, color: kDefaultTextColor),
                   ),
                   Text(
                     '/ 10,000',
-                    style: TextStyle(fontSize: 12, color: kFieldBorderColor),
+                    style: TextStyle(fontSize: isPhone ?12 :18, color: kFieldBorderColor),
                   )
                 ],
               ),
@@ -78,11 +79,12 @@ class BurnChartWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isPhone = MediaQuery.of(context).size.shortestSide < 550;
     return GestureDetector(
       onTap: () {},
       child: Container(
-        height: 125,
-        width: 120,
+        height: isPhone ?125 :180,
+        width: isPhone ?120 :180,
         decoration: BoxDecoration(
             border: Border.all(color: Color.fromARGB(255, 253, 76, 64)),
             image: DecorationImage(
@@ -97,7 +99,7 @@ class BurnChartWidget extends StatelessWidget {
                   Image.asset('assets/Icon/AcBurn.png'),
                   Text(
                     'Burn',
-                    style: TextStyle(fontSize: 12, color: kFieldBorderColor),
+                    style: TextStyle(fontSize: isPhone ?15 :22, color: kFieldBorderColor),
                   )
                 ],
               ),
@@ -105,23 +107,23 @@ class BurnChartWidget extends StatelessWidget {
             CircularStepProgressIndicator(
               totalSteps: 10000,
               currentStep: chartBurn,
-              stepSize: 12,
+              stepSize: isPhone ?12 :16,
               selectedColor: Color(0xFF38E6F0),
               unselectedColor: Colors.black,
-              width: 80,
-              height: 80,
-              selectedStepSize: 12,
+              width: isPhone ?80 :110,
+              height: isPhone ?80 :110,
+              selectedStepSize: isPhone ?12 :16,
               // roundedCap: (_, __) => true,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
                     chartBurn.toString(),
-                    style: TextStyle(fontSize: 12, color: kDefaultTextColor),
+                    style: TextStyle(fontSize: isPhone ?12 :18, color: kDefaultTextColor),
                   ),
                   Text(
                     '/ 10,000',
-                    style: TextStyle(fontSize: 12, color: kFieldBorderColor),
+                    style: TextStyle(fontSize: isPhone ?12 :18, color: kFieldBorderColor),
                   )
                 ],
               ),
@@ -134,12 +136,18 @@ class BurnChartWidget extends StatelessWidget {
 }
 
 class AboutyouWidget extends StatelessWidget {
-  const AboutyouWidget({
+  String? sex;
+  String? higth;
+  String? weight;
+  String? bmi;
+  AboutyouWidget({
     Key? key,
+    this.bmi,this.higth,this.sex,this.weight
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final isPhone = MediaQuery.of(context).size.shortestSide < 550;
     return Column(
       children: [
         Padding(
@@ -148,7 +156,7 @@ class AboutyouWidget extends StatelessWidget {
             children: [
               Icon(
                 Icons.person,
-                size: 30,
+                size: isPhone ?30 :45,
                 color: Colors.yellow,
               ),
               SizedBox(
@@ -157,7 +165,7 @@ class AboutyouWidget extends StatelessWidget {
               Text(
                 'Overview',
                 style: TextStyle(
-                    fontSize: 16,
+                    fontSize: isPhone ?16 :25,
                     fontWeight: FontWeight.bold,
                     color: kDefaultTextColor),
               ),
@@ -171,11 +179,11 @@ class AboutyouWidget extends StatelessWidget {
               children: [
                 Text(
                   'Gender',
-                  style: TextStyle(fontSize: 10, color: kFieldBorderColor),
+                  style: TextStyle(fontSize: isPhone ?10 :14, color: kFieldBorderColor),
                 ),
                 Text(
-                  'Mele',
-                  style: TextStyle(fontSize: 14, color: kDefaultTextColor),
+                  sex!,
+                  style: TextStyle(fontSize: isPhone ?14 :20, color: kDefaultTextColor),
                 ),
               ],
             ),
@@ -183,11 +191,11 @@ class AboutyouWidget extends StatelessWidget {
               children: [
                 Text(
                   'Weight',
-                  style: TextStyle(fontSize: 10, color: kFieldBorderColor),
+                  style: TextStyle(fontSize: isPhone ?10 :14, color: kFieldBorderColor),
                 ),
                 Text(
-                  '75.0',
-                  style: TextStyle(fontSize: 14, color: kDefaultTextColor),
+                  weight!,
+                  style: TextStyle(fontSize: isPhone ?14 :20, color: kDefaultTextColor),
                 ),
               ],
             ),
@@ -195,11 +203,11 @@ class AboutyouWidget extends StatelessWidget {
               children: [
                 Text(
                   'High',
-                  style: TextStyle(fontSize: 10, color: kFieldBorderColor),
+                  style: TextStyle(fontSize: isPhone ?10 :14, color: kFieldBorderColor),
                 ),
                 Text(
-                  '175.5',
-                  style: TextStyle(fontSize: 14, color: kDefaultTextColor),
+                  higth!,
+                  style: TextStyle(fontSize: isPhone ?14 :20, color: kDefaultTextColor),
                 ),
               ],
             ),
@@ -207,11 +215,11 @@ class AboutyouWidget extends StatelessWidget {
               children: [
                 Text(
                   'BMI',
-                  style: TextStyle(fontSize: 10, color: kFieldBorderColor),
+                  style: TextStyle(fontSize: isPhone ?10 :14, color: kFieldBorderColor),
                 ),
                 Text(
-                  '25.0',
-                  style: TextStyle(fontSize: 14, color: kDefaultTextColor),
+                  bmi!,
+                  style: TextStyle(fontSize: isPhone ?14 :20, color: kDefaultTextColor),
                 ),
               ],
             ),
